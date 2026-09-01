@@ -1,0 +1,43 @@
+{
+    "threshold": 0.78,
+    "iterations": 100,
+    "depth": 6,
+    "learning_rate": 0.1,
+    "class_weight": 171.75179856115108,
+    "model_type": "CatBoostClassifier",
+    "categorical_features": [
+        "merchant",
+        "category",
+        "gender",
+        "city",
+        "state",
+        "job"
+    ],
+    "model_features": [
+        "merchant",
+        "category",
+        "amt",
+        "gender",
+        "city",
+        "state",
+        "zip",
+        "lat",
+        "long",
+        "city_pop",
+        "job",
+        "merch_lat",
+        "merch_long",
+        "hour",
+        "day_of_week",
+        "month",
+        "customer_age",
+        "time_since_prev_txn",
+        "prev_txn_amt",
+        "log_amount_change_ratio",
+        "prev_avg_amt",
+        "amount_vs_prev_avg",
+        "txn_count_1h",
+        "txn_count_24h",
+        "customer_merchant_distance_km"
+    ]
+}
