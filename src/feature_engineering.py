@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from currency_utils import convert_inr_to_usd
 
 
 def haversine_distance(lat1, lon1, lat2, lon2):
@@ -87,15 +88,24 @@ def build_model_features(current_transaction, customer, history):
     Build the complete feature set required by the CatBoost model.
     """
 
+    # Create a separate copy for ML processing
+    model_transaction = current_transaction.copy()
+
+    # Convert analyst-entered INR amount to USD
+    # to match the training data currency.
+    model_transaction["amount"] = convert_inr_to_usd(
+        current_transaction["amount"]
+    )
+
     # Calculate basic/current-transaction features
     basic_features = calculate_basic_features(
-        current_transaction,
+        model_transaction,
         customer
     )
 
     # Calculate history-based features
     historical_features = calculate_historical_features(
-        current_transaction,
+        model_transaction,
         history
     )
 
@@ -116,7 +126,8 @@ def calculate_historical_features(current_transaction, history):
     """
 
     current_time = pd.to_datetime(
-        current_transaction["transaction_time"]
+        current_transaction["transaction_time"],
+        utc=True
     )
 
     current_amount = current_transaction["amount"]
@@ -137,7 +148,8 @@ def calculate_historical_features(current_transaction, history):
     history = history.sort_values("transaction_time").copy()
 
     history["transaction_time"] = pd.to_datetime(
-        history["transaction_time"]
+        history["transaction_time"],
+        utc= True
     )
 
     # Previous transaction

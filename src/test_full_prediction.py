@@ -6,7 +6,7 @@ transaction = {
     "transaction_time": "2026-09-02T11:00:00+05:30",
     "merchant": "integration_test_store",
     "category": "grocery",
-    "amount": 900.00,
+    "amount": 1000.00,
     "gender": "F",
     "city": "Bengaluru",
     "state": "Karnataka",

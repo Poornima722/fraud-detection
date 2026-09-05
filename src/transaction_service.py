@@ -3,7 +3,11 @@ import pandas as pd
 from supabase_admin import supabase_admin
 from feature_engineering import build_model_features
 from predict import predict_fraud
-
+from evidence_engine import (
+    generate_decision_reason,
+    generate_evidence,
+    get_risk_level,
+)
 
 def get_customer(customer_id):
     """
@@ -15,11 +19,26 @@ def get_customer(customer_id):
         .table("customers")
         .select("*")
         .eq("customer_id", customer_id)
-        .single()
         .execute()
     )
 
-    return response.data
+    customers = response.data or []
+    return customers[0] if customers else None
+
+
+def create_customer(customer_id, dob):
+    """
+    Create and return a customer profile for a new customer.
+    """
+
+    response = (
+        supabase_admin
+        .table("customers")
+        .insert({"customer_id": customer_id, "dob": dob})
+        .execute()
+    )
+
+    return response.data[0]
 
 
 def get_customer_history(customer_id):
@@ -90,9 +109,12 @@ def process_transaction(transaction):
     customer = get_customer(customer_id)
 
     if customer is None:
-        raise ValueError(
-            f"Customer '{customer_id}' not found."
-        )
+        dob = transaction.get("dob")
+        if dob is None or dob == "":
+            raise ValueError(
+                f"dob is required for new customer '{customer_id}'."
+            )
+        customer = create_customer(customer_id, dob)
 
     # 2. Get transaction history
     history = get_customer_history(customer_id)
@@ -105,12 +127,26 @@ def process_transaction(transaction):
     )
 
     # 4. Generate fraud prediction
-    result = predict_fraud(
-        model_features.iloc[0].to_dict()
-    )
+    features = model_features.iloc[0].to_dict()
+    result = predict_fraud(features)
 
-    # 5. Save transaction
-    transaction_response = save_transaction(transaction)
+    result["risk_level"] = get_risk_level(result["fraud_probability"])
+    result["decision_reason"] = generate_decision_reason(
+        result["risk_level"],
+        result["fraud_probability"],
+        result["threshold"],
+    )
+    result["evidence"] = generate_evidence(features)
+
+   # 5. Save transaction using the USD amount expected by the model
+    transaction_to_save = {
+        key: value for key, value in transaction.items()
+        if key != "dob"
+    }
+
+    transaction_to_save["amount"] = model_features.iloc[0]["amt"]
+
+    transaction_response = save_transaction(transaction_to_save)
 
     # 6. Get generated transaction ID
     transaction_id = transaction_response.data[0]["transaction_id"]

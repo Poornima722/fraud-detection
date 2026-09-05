@@ -63,3 +63,18 @@ CREATE TABLE customers (
     customer_id TEXT PRIMARY KEY,
     dob DATE NOT NULL
 );
+
+-- 4. Analyst decisions / audit trail
+CREATE TABLE analyst_decisions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    transaction_id UUID NOT NULL
+        REFERENCES transactions(transaction_id)
+        ON DELETE CASCADE,
+
+    risk_level TEXT NOT NULL,
+
+    action TEXT NOT NULL,
+
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
