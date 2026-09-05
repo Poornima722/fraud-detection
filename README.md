@@ -237,3 +237,14 @@ Create a `.env` file using `.env.example` as a template:
 SUPABASE_URL=your_supabase_project_url
 SUPABASE_KEY=your_supabase_key
 ```
+---
+
+## Future Scope & Production Roadmap
+
+- **Distributed Feature Store (Redis / Feast):** Replace on-the-fly feature calculation with a low-latency feature store to cache rolling customer behavioral features for high-throughput transaction scoring.
+
+- **Production 3-D Secure (3DS) Webhook Pipeline:** Upgrade the simulated step-up challenge to integrate real EMVCo/3DS authentication flows and payment-gateway callbacks.
+
+- **Dynamic Cost-Matrix Calibration:** Introduce automated model monitoring and retraining to recalibrate risk thresholds as transaction patterns and fraud-cost distributions evolve over time.
+
+- **Real-Time Geolocation Feeds:** Integrate IP, device, and merchant-location telemetry to complement the static geographic features currently used by the prototype.
